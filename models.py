@@ -10,6 +10,12 @@ Base = declarative_base()
 Session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
+async def init_db():
+    async with engine.begin() as conn:
+        print('create table')
+        await conn.run_sync(Base.metadata.create_all)
+
+
 class People(Base):
 
     __tablename__ = 'peoples'
@@ -28,23 +34,6 @@ class People(Base):
     species = Column(String(200))
     starships = Column(String(200))
     vehicles = Column(String(200))
-
-
-async def get_async_session(
-    drop: bool = False, create: bool = False
-):
-
-    async with engine.begin() as conn:
-        if drop:
-            await conn.run_sync(Base.metadata.drop_all)
-        if create:
-            print('create table')
-            await conn.run_sync(Base.metadata.create_all)
-    async_session_maker = sessionmaker(
-        engine, expire_on_commit=False, class_=AsyncSession
-    )
-
-    return async_session_maker
 
 
 async def save_people_in_db(people):

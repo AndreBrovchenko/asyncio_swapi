@@ -4,7 +4,7 @@ import aiohttp
 import config
 import time
 from more_itertools import chunked
-from models import get_async_session, save_people_in_db
+from models import save_people_in_db, init_db, People
 
 
 URL = 'http://swapi.dev/api/people/'
@@ -30,8 +30,7 @@ async def get_people(all_ids, partition, session):
 
 
 async def main():
-    await get_async_session(True, True)
-    # pool = await asyncpg.create_pool(config.PG_DSN, min_size=20, max_size=20)
+    await init_db()
     async with aiohttp.ClientSession() as session:
         async for people in get_people(range(16, MAX + 1), PARTITION, session):
             if 'detail' not in people:
@@ -39,11 +38,9 @@ async def main():
                 await asyncio.gather(asyncio.create_task(save_people_in_db(people)))
             else:
                 print('Not found')
-    # await pool.close()
 
 
 if __name__ == '__main__':
     start = time.time()
-    asyncio.run(main(), debug=True)
-    # asyncio.run(main())
+    asyncio.run(main(), debug=False)
     print(time.time() - start)

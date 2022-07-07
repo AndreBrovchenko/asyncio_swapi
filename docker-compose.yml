@@ -5,14 +5,29 @@ networks:
 
 services:
   db:
-    image: postgres:14.1
-    environment:
-      POSTGRES_PASSWORD: secret
-      POSTGRES_USER: app
-      POSTGRES_DB: app
+    build: db
     ports:
       - "5432:5432"
+    container_name: app_asyncio_db
     networks:
       net1:
         aliases:
           - database
+  app:
+    build:
+      context: .
+      args:
+        PG_DSN: 'postgresql+asyncpg://app_asyncio:secret@database:5432/asyncio_swapi'
+    ports:
+      - "5000:5000"
+    container_name: app_asyncio_swapi
+    depends_on:
+      - db
+    networks:
+      net1:
+        aliases:
+          - asyncio_app
+    restart:
+      always
+    volumes:
+      - ./:/app
