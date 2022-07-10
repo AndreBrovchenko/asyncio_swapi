@@ -16,7 +16,7 @@ services:
   app:
     build:
       context: .
-      args:
+    environment:
         PG_DSN: 'postgresql+asyncpg://app_asyncio:secret@database:5432/asyncio_swapi'
     ports:
       - "5000:5000"

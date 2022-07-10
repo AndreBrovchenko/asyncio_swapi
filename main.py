@@ -1,17 +1,15 @@
 import asyncio
 import asyncpg
 import aiohttp
-import config
 import time
 from more_itertools import chunked
-from models import save_people_in_db, init_db, People
+from models import save_people_in_db, init_db
 
 
 URL = 'http://swapi.dev/api/people/'
 # URL = 'http://swapi.tech/api/people/'
 
-# MAX = 100
-MAX = 20
+MAX = 100
 PARTITION = 10
 SLEEP_TIME = 1
 
@@ -32,7 +30,7 @@ async def get_people(all_ids, partition, session):
 async def main():
     await init_db()
     async with aiohttp.ClientSession() as session:
-        async for people in get_people(range(16, MAX + 1), PARTITION, session):
+        async for people in get_people(range(1, MAX + 1), PARTITION, session):
             if 'detail' not in people:
                 print(people['name'])
                 await asyncio.gather(asyncio.create_task(save_people_in_db(people)))
